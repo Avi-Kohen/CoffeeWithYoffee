@@ -16,7 +16,7 @@
                     <div class="row text-center">
                         <div class = "col-sm-3">
                             <a href ="/management">
-                                <h4>Managment</h4>
+                                <h4>Management</h4>
                                 <img width ="50px" src = "{{asset('images/management.png')}}"/>
                             </a>
                             </div>
