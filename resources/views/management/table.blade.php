@@ -20,12 +20,30 @@
                         <th scope="col">ID</th>
                         <th scope="col">Table</th>
                         <th scope="col">Status</th>
+                        <th scope="col">Location</th>
                         <th scope="col">Edit</th>
                         <th scope="col">Delete</th>
                     </tr>
                 </thead>
                 <tbody>
-
+                    @foreach($tables as $table)
+                        <tr>
+                            <td>{{$table->id}}</td>
+                            <td>{{$table->name}}</td>
+                            <td>{{$table->room}}</td>
+                            <td>{{$table->status}}</td>
+                            <td>
+                                <a href="/management/table/{{$table->id}}/edit" class="btn btn-warning">Edit</a>
+                            </td>
+                            <td>
+                                <form action="/management/table/{{$table->id}}" method="post">
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="submit" value="Delete" class="btn btn-danger">
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
 
