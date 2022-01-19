@@ -3,17 +3,10 @@
 @section('content')
     <div class = "container">
         <div class ="row justify-content-center">
-            <div class ="col-md-4">
-                <div class="list-group ">
-                    <a href ="/management/category" class="list-group-item list-group-item-action"><i class="fas fa-bars"></i> Category</a>
-                    <a class="list-group-item list-group-item-action"><i class="fas fa-mug-hot"></i> Menu</a>
-                    <a class="list-group-item list-group-item-action"><i class="fas fa-chair"></i> Table</a>
-                    <a class="list-group-item list-group-item-action"><i class="fas fa-user-edit"></i> User</a>
-                </div>
-            </div>
+            @include('management.inc.sidebar')
             <div class = "col-md-8">
-            <i class="fas fa-align-justify"></i> Category
-            <a href="/management/category/create" class = "btn btn-success btn-sm float-right"><i class="fas fa-plus"></i> Create Category</a>
+            <i class="fas fa-mug-hot"></i> Menu
+            <a href="/management/menu/create" class = "btn btn-success btn-sm float-right"><i class="fas fa-plus"></i> Create Menu</a>
             <hr>
             @if(Session()->has('status'))
                 <div class="alert alert-success">
@@ -25,31 +18,38 @@
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Picture</th>
+                        <th scope="col">Description</th>
                         <th scope="col">Category</th>
                         <th scope="col">Edit</th>
                         <th scope="col">Delete</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($categories as $category)
+                    @foreach($menus as $menu)
                         <tr>
-                            <th scope="row">{{$category->id}}</th>
-                            <td>{{$category->name}}</td>
-                        <td>
-                            <a href="/management/category/{{$category->id}}/edit" class="btn btn-warning">Edit</a>
-                        </td>
-                        <td>
-                        <form action="/management/category/{{$category->id}}" method="post">
-                            @csrf
-                            @method('DELETE')
-                            <input type="submit" value="Delete" class="btn btn-danger">
-                        </form>
-                        </td>
+                            <td>{{$menu->id}}</td>
+                            <td>{{$menu->name}}</td>
+                            <td>{{$menu->price}}₪</td>
+                            <td>
+                                <img src="{{asset('menu_images')}}/{{$menu->image}}" alt="{{$menu->name}}" width="100px" height="100px" class="img-thumbnail">
+                            </td>
+                            <td>{{$menu->description}}</td>
+                            <td>{{$menu->category->name}}</td>
+                            <td><a href="/management/menu/{{$menu->id}}/edit" class="btn btn-warning">Edit</a></td>
+                            <td>
+                                <form action="/management/menu/{{$menu->id}}" method="post">
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="submit" value="Delete" class="btn btn-danger">
+                                </form>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
-            {{$categories->links()}}
             </div>
         </div>
     </div>

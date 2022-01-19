@@ -6,7 +6,7 @@
         <div class ="row justify-content-center">
         @include('management.inc.sidebar')
             <div class = "col-md-8">
-            <i class="fas fa-align-justify"></i> Edit a Category
+            <i class="fas fa-chair"></i> Create a Table
             <hr>
             @if($errors->any())
                 <div class="alert alert-danger">
@@ -17,12 +17,11 @@
                     </ul>
                 </div>
             @endif
-            <form action ="/management/category/{{$category->id}}" method="POST">
+            <form action ="/management/category" method="POST">
                 @csrf
-                @method('PUT')
                 <div class = "form-group">
                     <label for= "categoryName">Category Name</label>
-                    <input type ="text" name = "name" value="{{$category->name}}" class="form-control" placeholder ="Category...">
+                    <input type ="text" name = "name" class="form-control" placeholder ="Category...">
                 </div>
                 <button type ="Submit" class="btn btn-primary">Save</button>
             </form>
