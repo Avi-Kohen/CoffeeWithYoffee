@@ -2,6 +2,8 @@
 
 @section('content')
 
+
+
 <div class="container">
     <div class="row" id="table-detail"></div>
     <div class="row justify-content-center">
@@ -25,6 +27,11 @@
     </div>
 </div>
 
+@if(Auth::user()->checkClient())
+<script>
+    var userType = "client";
+</script>
+@endif
 
 <!-- Modal -->
 
@@ -40,6 +47,12 @@
             <div class="modal-body">
                 <script src="https://www.paypal.com/sdk/js?client-id=Ac-6hn8l9UXHEjE_WNV-2NXC5tXFuR12dk3FjpO9PD9qTcpXhTL9GWYX09Z9AXLX5QRZbxNqTwc5QPP0&currency=ILS"></script>
                 <h3 class="totalAmount"></h3>
+                @if (!(Auth::user()->checkClient()))
+                <div class="input-group mb-3" id="clientname" value="{{Auth::user()->checkBarista()}}">
+                    <span class="input-group-text">Enter Client Name</span>
+                    <input type="text" id="cname" class="form-control">
+                </div>
+                @endif
                 <div class="form-group">
                     <label for="payment"><br>
                         <h4>Please Choose Payment Type:</h4>
@@ -70,6 +83,7 @@
     $(document).ready(function() {
         //make table detail hidden
         $("#table-detail").hide();
+
 
         function getTotalPrice() {
             return $(".btn-payment").attr('data-totalAmount');
@@ -105,7 +119,6 @@
                 $(".changeAmount").html('');
                 $('.paypal').show();
 
-                // $("#paypal-text").html('<form class="form-horizontal" method="POST" id="payment-form"  action= {!! URL::route("paypal") !!} >{{ csrf_field() }}<div id="amount" type="text"  name="amount" value=' + getTotalPrice() + '></div><button type="submit" class="btn btn-primary">Pay ' + totalAmount + '₪ with PayPal</button></form>');
                 paypal.Buttons({
 
                     // Sets up the transaction when a payment button is clicked
@@ -148,6 +161,7 @@
             var recievedAmount = getRecievedAmount;
             var paymentType = $("#payment-type").val();
             var saleID = SALE_ID;
+
             $.ajax({
                 type: "POST",
                 data: {
@@ -165,16 +179,21 @@
 
         //show all tables when a client click on the button
         $("#btn-show-tables").click(function() {
+
             if ($("#table-detail").is(":hidden")) {
                 $.get("/menu/getTable", function(data) {
                     $("#table-detail").html(data);
                     $("#table-detail").slideDown('fast');
                     $("#btn-show-tables").html('Hide Tables').removeClass('btn-primary').addClass('btn-danger');
+                    if (userType == "client") {
+
+                    }
                 })
             } else {
                 $("#table-detail").slideUp('fast');
                 $("#btn-show-tables").html('View All Tables').removeClass('btn-danger').addClass('btn-primary');
             }
+
         });
 
         //load menus by category
@@ -206,6 +225,8 @@
                 alert("You need to select a table first");
             } else {
                 var menu_id = $(this).data("id");
+                var cname = $("#cname").val();
+                var barista = $("clientname").val();
                 $.ajax({
                     type: "POST",
                     data: {
@@ -213,7 +234,10 @@
                         "menu_id": menu_id,
                         "table_id": SELECTED_TABLE_ID,
                         "table_name": SELECTED_TABLE_NAME,
-                        "quantity": 1
+                        "quantity": 1,
+                        "cname": cname,
+                        "barista": barista
+
                     },
                     url: "/menu/orderFood",
                     success: function(data) {
@@ -265,6 +289,38 @@
             SALE_ID = $(this).data('id');
         });
 
+
+        // increase quantity
+        $("#order-detail").on("click", ".btn-increase-quantity", function() {
+            var saleDetailID = $(this).data("id");
+            $.ajax({
+                type: "POST",
+                data: {
+                    "_token": $('meta[name="csrf-token"]').attr('content'),
+                    "saleDetail_id": saleDetailID
+                },
+                url: "/menu/increase-quantity",
+                success: function(data) {
+                    $("#order-detail").html(data);
+                }
+            })
+        });
+
+        // decrease quantity
+        $("#order-detail").on("click", ".btn-decrease-quantity", function() {
+            var saleDetailID = $(this).data("id");
+            $.ajax({
+                type: "POST",
+                data: {
+                    "_token": $('meta[name="csrf-token"]').attr('content'),
+                    "saleDetail_id": saleDetailID
+                },
+                url: "/menu/decrease-quantity",
+                success: function(data) {
+                    $("#order-detail").html(data);
+                }
+            })
+        });
     });
 </script>
 @endsection
