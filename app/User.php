@@ -36,4 +36,30 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function checkAdmin()
+    {
+        if ($this->role == "admin") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function checkBarista()
+    {
+        if ($this->role == "barista") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public function checkClient()
+    {
+        if ($this->role == "client") {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

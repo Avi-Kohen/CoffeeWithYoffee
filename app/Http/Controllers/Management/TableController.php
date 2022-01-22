@@ -17,8 +17,8 @@ class TableController extends Controller
      */
     public function index()
     {
-        $tables= Table::all();
-        return view('management.table')->with('tables',$tables);
+        $tables = Table::all();
+        return view('management.table')->with('tables', $tables);
     }
 
     /**
@@ -40,14 +40,16 @@ class TableController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'=>'required|unique:tables|max:255',
-            'room'=>'required|in:Outside,Inside'
+            'name' => 'required|max:255',
+            'room' => 'required|in:Outside,Inside',
+            'seats' => 'required|numeric '
         ]);
-        $table =new Table();
+        $table = new Table();
         $table->name = $request->name;
         $table->room = $request->room;
+        $table->seats = $request->seats;
         $table->save();
-        $request->session()->flash('status','Table '.$request->name.' is created successfully');
+        $request->session()->flash('status', 'Table ' . $request->name . ' is created successfully');
         return redirect('management/table');
     }
 
@@ -71,7 +73,7 @@ class TableController extends Controller
     public function edit($id)
     {
         $table = Table::find($id);
-        return view('management.editTable')->with('table',$table);
+        return view('management.editTable')->with('table', $table);
     }
 
     /**
@@ -84,13 +86,13 @@ class TableController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name'=>'required|unique:tables|max:255'
+            'name' => 'required|unique:tables|max:255'
         ]);
         $table = Table::find($id);
         $table->name = $request->name;
         $table->room = $request->room;
         $table->save();
-        $request->session()->flash('status','The table is updated to '.$request->name.' successfully');
+        $request->session()->flash('status', 'The table is updated to ' . $request->name . ' successfully');
         return redirect('/management/table');
     }
 
@@ -103,7 +105,7 @@ class TableController extends Controller
     public function destroy($id)
     {
         Table::destroy($id);
-        Session()->flash('status','The table is deleted successfully');
+        Session()->flash('status', 'The table is deleted successfully');
         return redirect('/management/table');
     }
 }

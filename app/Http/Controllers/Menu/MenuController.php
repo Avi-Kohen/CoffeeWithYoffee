@@ -25,19 +25,21 @@ class MenuController extends Controller
         $tables = Table::all();
         $html = '';
         foreach ($tables as $table) {
-            $html .= '<div class="col-md-2 mb-4">';
-            $html .=
-                '<button class="btn btn-primary btn-table" data-id="' . $table->id . '" data-name="' . $table->name . '" data-room="' . $table->room . '">
+            if (!(Auth::user()->role == "client" && $table->status == "unavailable")) {
+                $html .= '<div class="col-md-2 mb-4">';
+                $html .= '
+                <button class="btn btn-primary btn-table" value="' . $table->status . '"  data-id="' . $table->id . '" data-name="' . $table->name . '" data-room="' . $table->room . '">
             <img class="img-fluid" src="' . url('/images/table.png') . '"/>
             <br>';
-            if ($table->status == "available") {
-                $html .= '<span class="badge badge-success">' . $table->name . '</span>';
-            } else { // a table is not available
-                $html .= '<span class="badge badge-danger">' . $table->name . '</span>';
-            }
+                if ($table->status == "available") {
+                    $html .= '<span class="badge badge-success">' . $table->name . '</span>';
+                } else { // a table is not available
+                    $html .= '<span class="badge badge-danger">' . $table->name . '</span>';
+                }
 
-            $html .= '</button>';
-            $html .= '</div>';
+                $html .= '</button>';
+                $html .= '</div>';
+            }
         }
         return $html;
     }
@@ -75,7 +77,10 @@ class MenuController extends Controller
             $sale->table_id = $table_id;
             $sale->table_name = $table_name;
             $sale->user_id = $user->id;
-            $sale->user_name = $user->name;
+            if ($request->barista) {
+                $sale->user_name = $request->cname;
+            } else
+                $sale->user_name = $user->name;
             $sale->save();
             $sale_id = $sale->id;
             // update table status
@@ -120,6 +125,7 @@ class MenuController extends Controller
     private function getSaleDetails($sale_id)
     {
 
+
         //list all saledetail
         $html = '<p>Sale ID: ' . $sale_id . '</p>';
         $saleDetails = SaleDetail::where('sale_id', $sale_id)->get();
@@ -138,11 +144,17 @@ class MenuController extends Controller
         <tbody>';
         $showBtnPayment = true;
         foreach ($saleDetails as $saleDetail) {
+
+            $decreaseButton = '<button  class="btn btn-danger btn-sm btn-decrease-quantity" disabled>-</button>';
+            if ($saleDetail->quantity > 1) {
+                $decreaseButton = '<button data-id="' . $saleDetail->id . '"  class="btn btn-danger btn-sm btn-decrease-quantity">-</button>';
+            }
+
             $html .= '
             <tr>
                 <td>' . $saleDetail->menu_id . '</td>
                 <td>' . $saleDetail->menu_name . '</td>
-                <td>' . $saleDetail->quantity . '</td>
+                <td>' . $decreaseButton . ' ' . $saleDetail->quantity . ' <button data-id="' . $saleDetail->id . '"  class="btn btn-primary btn-sm btn-increase-quantity">+</button></td>
                 <td>' . $saleDetail->menu_price . '</td>
                 <td>' . ($saleDetail->menu_price * $saleDetail->quantity) . '</td>';
             if ($saleDetail->status == "noConfirm") {
@@ -204,6 +216,10 @@ class MenuController extends Controller
         $saleID = $request->saleID;
         $recievedAmount = $request->recievedAmount;
         $paymentType = $request->paymentType;
+
+
+
+
         //update sale info in the sales table by using sale model
         $sale = Sale::find($saleID);
         $sale->total_recieved = $recievedAmount;
@@ -223,5 +239,33 @@ class MenuController extends Controller
         $sale = Sale::find($saleID);
         $saleDetails = SaleDetail::where('sale_id', $saleID)->get();
         return view('menu.showReceipt')->with('sale', $sale)->with('saleDetails', $saleDetails);
+    }
+
+    public function increaseQuantity(Request $request)
+    {
+        $saleDetail_id = $request->saleDetail_id;
+        $saleDetail = SaleDetail::where('id', $saleDetail_id)->first();
+        $saleDetail->quantity = $saleDetail->quantity + 1;
+        $saleDetail->save();
+
+        $sale = Sale::where('id', $saleDetail->sale_id)->first();
+        $sale->total_price = $sale->total_price + $saleDetail->menu_price;
+        $sale->save();
+        $html = $this->getSaleDetails($saleDetail->sale_id);
+        return $html;
+    }
+
+    public function decreaseQuantity(Request $request)
+    {
+        $saleDetail_id = $request->saleDetail_id;
+        $saleDetail = SaleDetail::where('id', $saleDetail_id)->first();
+        $saleDetail->quantity = $saleDetail->quantity - 1;
+        $saleDetail->save();
+
+        $sale = Sale::where('id', $saleDetail->sale_id)->first();
+        $sale->total_price = $sale->total_price + $saleDetail->menu_price;
+        $sale->save();
+        $html = $this->getSaleDetails($saleDetail->sale_id);
+        return $html;
     }
 }
