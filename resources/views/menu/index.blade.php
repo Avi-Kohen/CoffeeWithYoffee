@@ -75,6 +75,8 @@
             return $(".btn-payment").attr('data-totalAmount');
         }
 
+        var getRecievedAmount;
+
         //choose payment type
         $("#payment-type").change(function() {
 
@@ -85,6 +87,7 @@
                 $("#recieved-amount").keyup(function() {
                     var totalAmount = $(".btn-payment").attr('data-totalAmount');
                     var recievedAmount = $(this).val();
+                    getRecievedAmount = recievedAmount;
                     var changeAmount = recievedAmount - totalAmount;
                     $(".changeAmount").html("Total Change: ₪" + changeAmount);
 
@@ -125,6 +128,7 @@
                             tranStatus = transaction.status;
                             if (tranStatus == "COMPLETED") {
                                 $('.btn-save-payment').prop('disabled', false);
+                                getRecievedAmount = getTotalPrice();
                             }
                             //alert('Transaction ' + transaction.status + ': ' + transaction.id + '\n\nPlease finish order by pressing Save Payment');
                             // When ready to go live, remove the alert and show a success message within this page. For example:
@@ -141,7 +145,7 @@
         });
         //save payment
         $(".btn-save-payment").click(function() {
-            var recievedAmount = getTotalPrice();
+            var recievedAmount = getRecievedAmount;
             var paymentType = $("#payment-type").val();
             var saleID = SALE_ID;
             $.ajax({

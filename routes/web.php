@@ -34,15 +34,16 @@ Route::post('/menu/deleteSaleDetail', 'Menu\MenuController@deleteSaleDetail');
 Route::post('/menu/confirmOrderStatus', 'Menu\MenuController@confirmOrderStatus');
 
 Route::post('/menu/savePayment', 'Menu\MenuController@savePayment');
+Route::get('/menu/showReceipt/{saleID}', 'Menu\MenuController@showreceipt');
 
 Route::resource('management/category', 'Management\CategoryController');
 Route::resource('management/menu', 'Management\MenuController');
 Route::resource('management/table', 'Management\TableController');
 
-// Route::get('payment', 'PayPalController@payment')->name('payment');
-// Route::get('cancel', 'PayPalController@cancel')->name('payment.cancel');
-// Route::get('payment/success', 'PayPalController@success')->name('payment.success');
+//routes for report
 
+Route::get('/report', 'Report\ReportController@index');
+Route::get('/report/show', 'Report\ReportController@show');
 
-Route::post('paypal', array('as' => 'paypal', 'uses' => 'PaypalController@postPaymentWithpaypal',));
-Route::get('paypal', array('as' => 'status', 'uses' => 'PaypalController@getPaymentStatus',));
+//export to excel
+Route::get('/report/show/export', 'Report\ReportController@export');
